@@ -63,3 +63,8 @@ class Grid:
 
         self._grid[column][height - 1] = None
         self._heights[column] -= 1
+
+    @property
+    def available_moves(self) -> List[int]:
+        return [col_id for col_id in range(self._ncols)
+                if self._heights[col_id] < self._nrows]
