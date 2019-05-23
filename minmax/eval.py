@@ -5,7 +5,7 @@ from environment.grid import State
 
 
 class Evaluator:
-    weights = [0, 1, 2, 50, 100000]
+    weights = [0, 0, 2, 10, 100]
 
     @staticmethod
     def evaluate(state: State) -> int:
