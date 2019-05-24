@@ -1,5 +1,7 @@
 from typing import Union
 
+from math import sqrt, log
+
 from environment.colors import Color
 from environment.grid import State, Grid
 from environment.judge import Judge
@@ -51,7 +53,21 @@ class MCTSPlayer(Player):
         return best_move
 
     def _select_best_child_of(self, grid: Grid, current_color: Color) -> int:
-        pass
+        parent_visits = self._tree[grid.state].visits
+        best_ucb, best_move = -1., None
+
+        assert len(grid.available_moves) > 0, 'A leaf actually'
+        for move in grid.available_moves:
+            grid.move(current_color, move)
+            child_info: NodeInfo = self._tree[grid.state]
+            grid.undo_move(move)
+
+            if child_info.visits == 0: ucb = 1e9
+            else: ucb = child_info.wins / child_info.visits + \
+                        2. * sqrt(log(parent_visits) / child_info.visits)
+
+            if ucb > best_ucb: best_ucb, best_move = ucb, move
+        return best_move
 
     def _traverse_from(self, grid: Grid, current_color: Color) -> bool:
         pass
