@@ -15,6 +15,13 @@ class State:
     def cols_first(self):
         return self._data
 
+    def __eq__(self, other):
+        return isinstance(other, State) and self._data == other._data
+
+    def __hash__(self):
+        tuples = [tuple(col) for col in self._data]
+        return hash(tuple(tuples))
+
 
 class Grid:
     def __init__(self, ncols: int = 7, nrows: int = 6):
@@ -63,3 +70,8 @@ class Grid:
 
         self._grid[column][height - 1] = None
         self._heights[column] -= 1
+
+    @property
+    def available_moves(self) -> List[int]:
+        return [col_id for col_id in range(self._ncols)
+                if self._heights[col_id] < self._nrows]
