@@ -6,11 +6,7 @@ from environment.game import Game
 from environment.grid import State, Grid
 from environment.judge import Judge
 from environment.player import Player
-from minmax.eval import Evaluator
-
-INF = int(1e9)
-MAX_COLOR = Color.RED
-MIN_COLOR = Color.BLACK
+from minmax.eval import Evaluator, INF, MAX_COLOR, MIN_COLOR
 
 
 class MinmaxPlayer(Player):
@@ -53,7 +49,7 @@ class MinmaxPlayer(Player):
 
         if self._deadline.is_set() or depth == 0 or \
                 (last_move is not None and self._judge.is_over_after_move_in_col(grid.state, last_move)):
-            return self._evaluate(grid.state), 0
+            return self._evaluate(grid.state, self._judge), 0
 
         value = -INF if color == MAX_COLOR else INF
         best_move = None
@@ -80,5 +76,5 @@ class MinmaxPlayer(Player):
 if __name__ == '__main__':
     game = Game(Grid(), Judge(),
                 MinmaxPlayer(Color.RED, Judge(), Evaluator(), 4, 30),
-                MinmaxPlayer(Color.BLACK, Judge(), Evaluator(), 3, 18))
+                MinmaxPlayer(Color.BLACK, Judge(), Evaluator(), 6, 18))
     print(game.play())
