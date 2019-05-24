@@ -40,34 +40,36 @@ class MCTSPlayer(Player):
             self._tree[s] = new_info
         self._nodes_for_backprop.clear()
 
-    def _pick_most_visited_child_of(self, grid: Grid) -> int:
-        best_move, most_visits = None, -1
-        for move in grid.available_moves:
-            grid.move(self._color, move)
-            visits = self._tree[grid.state].visits
-            grid.undo_move(move)
+    def _select_best_child(self, parent: Grid, map_node_info: callable,
+                           current_color: Color) -> int:
+        """map_node_info should take parent's node_info and child's and return a positive float"""
+        assert len(parent.available_moves) > 0, 'A leaf actually'
 
-            if visits > most_visits:
-                most_visits, best_move = visits, move
+        parent_info = self._tree[parent.state]
+        best_move, best_result = None, -1
+        for move in parent.available_moves:
+            parent.move(current_color, move)
+            child_info = self._tree[parent.state]
+            parent.undo_move(move)
+
+            temp_result = map_node_info(parent_info, child_info)
+            if temp_result > best_result:
+                best_result, best_move = temp_result, move
 
         return best_move
+
+    def _pick_most_visited_child_of(self, grid: Grid) -> int:
+        return self._select_best_child(grid,
+                                       lambda child_info, _: child_info.visits,
+                                       self._color)
 
     def _select_best_child_of(self, grid: Grid, current_color: Color) -> int:
-        parent_visits = self._tree[grid.state].visits
-        best_ucb, best_move = -1., None
+        def ucb(child_info: NodeInfo, parent_info: NodeInfo) -> float:
+            if child_info.visits == 0: return 1e9
+            return child_info.wins / child_info.visits + \
+                   2. * sqrt(log(parent_info.visits) / child_info.visits)
 
-        assert len(grid.available_moves) > 0, 'A leaf actually'
-        for move in grid.available_moves:
-            grid.move(current_color, move)
-            child_info: NodeInfo = self._tree[grid.state]
-            grid.undo_move(move)
-
-            if child_info.visits == 0: ucb = 1e9
-            else: ucb = child_info.wins / child_info.visits + \
-                        2. * sqrt(log(parent_visits) / child_info.visits)
-
-            if ucb > best_ucb: best_ucb, best_move = ucb, move
-        return best_move
+        return self._select_best_child(grid, ucb, current_color)
 
     def _traverse_from(self, grid: Grid, current_color: Color) -> bool:
         pass
