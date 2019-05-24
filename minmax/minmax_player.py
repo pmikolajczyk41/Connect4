@@ -54,9 +54,8 @@ class MinmaxPlayer(Player):
         value = -INF if color == MAX_COLOR else INF
         best_move = None
         for move in grid.available_moves:
-            grid.move(color, move)
-            child_value, _ = self._minmax(grid, depth - 1, alpha, beta, Color(1 - color), move)
-            grid.undo_move(move)
+            child_value, _ = self._minmax(grid.grid_after_move(color, move),
+                                          depth - 1, alpha, beta, Color(1 - color), move)
 
             if color == MAX_COLOR and child_value > value:
                 best_move = move

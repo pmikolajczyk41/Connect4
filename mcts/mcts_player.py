@@ -49,9 +49,7 @@ class MCTSPlayer(Player):
         parent_info = self._tree[parent.state]
         best_move, best_result = None, -1
         for move in parent.available_moves:
-            parent.move(current_color, move)
-            child_info = self._tree[parent.state]
-            parent.undo_move(move)
+            child_info = self._tree[parent.grid_after_move(current_color, move).state]
 
             temp_result = map_node_info(parent_info, child_info)
             if temp_result > best_result:
@@ -77,12 +75,9 @@ class MCTSPlayer(Player):
         node_info: NodeInfo = self._tree[grid.state]
         if not node_info.is_leaf:
             move = self._select_best_child_of(grid, current_color)
+            return self._traverse_from(grid.grid_after_move(current_color, move),
+                                       Color(1 - current_color))
 
-            grid.move(current_color, move)
-            has_won = self._traverse_from(grid, Color(1 - current_color))
-            grid.undo_move(move)
-
-            return has_won
         elif len(grid.available_moves) == 0: return False
         elif node_info.visits == 0:
             return self._rollout_from(grid, current_color)
@@ -91,17 +86,13 @@ class MCTSPlayer(Player):
                                               visits=node_info.visits,
                                               is_leaf=False)
             for move in grid.available_moves:
-                grid.move(current_color, move)
-                if grid.state not in self._tree.keys():
-                    self._tree[grid.state] = NodeInfo(wins=0, visits=0, is_leaf=True)
-                grid.undo_move(move)
+                new_grid = grid.grid_after_move(current_color, move)
+                if new_grid.state not in self._tree.keys():
+                    self._tree[new_grid.state] = NodeInfo(wins=0, visits=0, is_leaf=True)
 
             move = random.choice(grid.available_moves)
-            grid.move(current_color, move)
-            has_won = self._traverse_from(grid, Color(1 - current_color))
-            grid.undo_move(move)
-
-            return has_won
+            return self._traverse_from(grid.grid_after_move(current_color, move),
+                                       Color(1 - current_color))
 
     def _rollout_from(self, grid: Grid, color: Color, last_col: Union[int, None] = None) -> bool:
         if (last_col is None and self._judge.is_over(grid.state)) or \
@@ -109,7 +100,6 @@ class MCTSPlayer(Player):
             return color != self._color
 
         move = random.choice(grid.available_moves)
-        grid.move(color, move)
-        has_won = self._rollout_from(grid, Color(1 - color), move)
-        grid.undo_move(move)
+        has_won = self._rollout_from(grid.grid_after_move(color, move),
+                                     Color(1 - color), move)
         return has_won
