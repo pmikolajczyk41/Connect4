@@ -104,4 +104,12 @@ class MCTSPlayer(Player):
             return has_won
 
     def _rollout_from(self, grid: Grid, color: Color, last_col: Union[int, None] = None) -> bool:
-        pass
+        if (last_col is None and self._judge.is_over(grid.state)) or \
+                (last_col is not None and self._judge.is_over_after_move_in_col(grid.state, last_col)):
+            return color != self._color
+
+        move = random.choice(grid.available_moves)
+        grid.move(color, move)
+        has_won = self._rollout_from(grid, Color(1 - color), move)
+        grid.undo_move(move)
+        return has_won
