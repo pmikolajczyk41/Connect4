@@ -25,6 +25,7 @@ class MinmaxPlayer(Player):
         self._timeout = timeout
         self._deadline = Event()
         self._evaluate = evaluator.evaluate
+        self._transposition_table = dict()
 
     def make_move_in_state(self, state: State) -> int:
         self._deadline.clear()
@@ -34,7 +35,7 @@ class MinmaxPlayer(Player):
 
     def _iterative_deepening(self, grid: Grid) -> int:
         assert len(grid.available_moves) > 0, 'No move available'
-        best_value, best_move = -INF if self._color == MAX_COLOR else INF, None
+        best_value, best_move = -INF if self._color == MAX_COLOR else INF, grid.available_moves[0]
 
         for depth in range(1, self._depth + 1):
             value, move = self._minmax(grid, depth, -INF, INF, self._color, None)
@@ -47,6 +48,9 @@ class MinmaxPlayer(Player):
     def _minmax(self, grid: Grid, depth: int, alpha: int, beta: int,
                 color: Color, last_move: Union[int, None]) -> Tuple[int, int]:
         """Returns (best available value, move towards best value)"""
+        computed = self._transposition_table.get(grid.state, None)
+        if computed is not None and computed[0] >= depth: return computed[1:]
+
         if self._deadline.is_set() or depth == 0 or \
                 (last_move is not None and self._judge.is_over_after_move_in_col(grid.state, last_move)):
             return self._evaluate(grid.state), 0
@@ -69,11 +73,12 @@ class MinmaxPlayer(Player):
 
             if alpha >= beta: break
 
+        self._transposition_table[grid.state] = (depth, value, best_move)
         return value, best_move
 
 
 if __name__ == '__main__':
     game = Game(Grid(), Judge(),
-                MinmaxPlayer(Color.RED, Judge(), Evaluator(), 3, 7),
-                MinmaxPlayer(Color.BLACK, Judge(), Evaluator(), 3, 6))
+                MinmaxPlayer(Color.RED, Judge(), Evaluator(), 4, 30),
+                MinmaxPlayer(Color.BLACK, Judge(), Evaluator(), 3, 18))
     print(game.play())

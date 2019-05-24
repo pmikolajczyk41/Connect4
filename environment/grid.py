@@ -15,6 +15,13 @@ class State:
     def cols_first(self):
         return self._data
 
+    def __eq__(self, other):
+        return isinstance(other, State) and self._data == other._data
+
+    def __hash__(self):
+        tuples = [tuple(col) for col in self._data]
+        return hash(tuple(tuples))
+
 
 class Grid:
     def __init__(self, ncols: int = 7, nrows: int = 6):
