@@ -1,3 +1,4 @@
+import random
 from typing import Union
 
 from math import sqrt, log
@@ -26,15 +27,15 @@ class MCTSPlayer(Player):
             self._tree[state] = NodeInfo(visits=0, is_leaf=True, wins=0)
 
         for _ in range(self._iterations):
-            won = self._traverse_from(grid, self._color)
-            self._backprop(won)
+            has_won = self._traverse_from(grid, self._color)
+            self._backprop(has_won)
 
         return self._pick_most_visited_child_of(grid)
 
-    def _backprop(self, won: bool) -> None:
+    def _backprop(self, has_won: bool) -> None:
         for s in self._nodes_for_backprop:
             node_info = self._tree[s]
-            new_info = NodeInfo(wins=node_info.wins + won,
+            new_info = NodeInfo(wins=node_info.wins + has_won,
                                 visits=node_info.visits + 1,
                                 is_leaf=node_info.is_leaf)
             self._tree[s] = new_info
@@ -72,7 +73,35 @@ class MCTSPlayer(Player):
         return self._select_best_child(grid, ucb, current_color)
 
     def _traverse_from(self, grid: Grid, current_color: Color) -> bool:
-        pass
+        self._nodes_for_backprop.append(grid.state)
+        node_info: NodeInfo = self._tree[grid.state]
+        if not node_info.is_leaf:
+            move = self._select_best_child_of(grid, current_color)
+
+            grid.move(current_color, move)
+            has_won = self._traverse_from(grid, Color(1 - current_color))
+            grid.undo_move(move)
+
+            return has_won
+        elif len(grid.available_moves) == 0: return False
+        elif node_info.visits == 0:
+            return self._rollout_from(grid, current_color)
+        else:
+            self._tree[grid.state] = NodeInfo(wins=node_info.wins,
+                                              visits=node_info.visits,
+                                              is_leaf=False)
+            for move in grid.available_moves:
+                grid.move(current_color, move)
+                if grid.state not in self._tree.keys():
+                    self._tree[grid.state] = NodeInfo(wins=0, visits=0, is_leaf=True)
+                grid.undo_move(move)
+
+            move = random.choice(grid.available_moves)
+            grid.move(current_color, move)
+            has_won = self._traverse_from(grid, Color(1 - current_color))
+            grid.undo_move(move)
+
+            return has_won
 
     def _rollout_from(self, grid: Grid, color: Color, last_col: Union[int, None] = None) -> bool:
         pass
