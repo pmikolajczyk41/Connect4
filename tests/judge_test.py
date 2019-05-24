@@ -127,4 +127,15 @@ class JudgeTest(TestCase):
         g = Grid(ncols=2, nrows=2)
 
         with self.assertRaises(AssertionError):
-            judge.is_over_from_last_in_col(g.state, 1)
+            judge.is_over_after_move_in_col(g.state, 1)
+
+    def test_middle_finishing(self):
+        judge = Judge()
+        g = Grid(ncols=4, nrows=2)
+        g.move(Color.RED, 0)
+        g.move(Color.RED, 1)
+        g.move(Color.RED, 3)
+        g.move(Color.RED, 2)
+
+        self.assertTrue(judge.is_over(g.state))
+        self.assertTrue(judge.is_over_after_move_in_col(g.state, 2))

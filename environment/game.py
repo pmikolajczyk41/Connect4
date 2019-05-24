@@ -22,11 +22,11 @@ class Game:
         size = self._grid.nrows * self._grid.ncols
         for _ in range(size):
             last_col = self._move(self._a_player, self._a_color)
-            if self._judge.is_over_from_last_in_col(self._grid.state, last_col):
+            if self._judge.is_over_after_move_in_col(self._grid.state, last_col):
                 return Winner.FIRST
 
             last_col = self._move(self._b_player, self._b_color)
-            if self._judge.is_over_from_last_in_col(self._grid.state, last_col):
+            if self._judge.is_over_after_move_in_col(self._grid.state, last_col):
                 return Winner.SECOND
 
         return Winner.DRAW
