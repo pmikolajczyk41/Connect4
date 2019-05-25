@@ -80,7 +80,7 @@ class MCTSPlayer(Player):
                                        lambda _, child_info: child_info.visits,
                                        self._color)
 
-    def _select_best_child_of(self, grid: Grid, current_color: Color) -> int:
+    def _select_best_child_ucb(self, grid: Grid, current_color: Color) -> int:
         def ucb(parent_info: NodeInfo, child_info: NodeInfo) -> float:
             if child_info.visits == 0: return 1e9
             return child_info.wins / child_info.visits + \
@@ -92,7 +92,7 @@ class MCTSPlayer(Player):
         self._nodes_for_backprop.append(grid.state)
         node_info: NodeInfo = self._tree[grid.state]
         if not node_info.is_leaf:
-            move = self._select_best_child_of(grid, current_color)
+            move = self._select_best_child_ucb(grid, current_color)
             return self._traverse_from(grid.grid_after_move(current_color, move),
                                        Color(1 - current_color))
 
