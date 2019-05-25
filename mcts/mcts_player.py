@@ -1,4 +1,5 @@
 import random
+from threading import Event, Timer
 from typing import Union
 
 from math import sqrt, log
@@ -13,10 +14,13 @@ from mcts.node_info import NodeInfo
 
 class MCTSPlayer(Player):
 
-    def __init__(self, color: Color, judge: Judge, iterations: int):
+    def __init__(self, color: Color, judge: Judge, timeout: Union[int, None], iterations: int = 0):
         self._color = color
         self._judge = judge
-        self._iterations = iterations
+
+        if timeout is None: self._iterations = iterations
+        else: self._timeout, self._deadline = timeout, Event()
+
         self._tree = dict()
         self._nodes_for_backprop = []
 
@@ -27,9 +31,16 @@ class MCTSPlayer(Player):
         if state not in self._tree.keys():
             self._tree[state] = NodeInfo(visits=0, is_leaf=True, wins=0)
 
-        for _ in range(self._iterations):
-            has_won = self._traverse_from(grid, self._color)
-            self._backprop(has_won)
+        if hasattr(self, '_timeout'):
+            self._deadline.clear()
+            Timer(self._timeout, lambda: self._deadline.set()).start()
+            while not self._deadline.is_set():
+                has_won = self._traverse_from(grid, self._color)
+                self._backprop(has_won)
+        else:
+            for _ in range(self._iterations):
+                has_won = self._traverse_from(grid, self._color)
+                self._backprop(has_won)
 
         return self._pick_most_visited_child_of(grid)
 
@@ -67,7 +78,7 @@ class MCTSPlayer(Player):
         def ucb(parent_info: NodeInfo, child_info: NodeInfo) -> float:
             if child_info.visits == 0: return 1e9
             return child_info.wins / child_info.visits + \
-                   2. * sqrt(log(parent_info.visits) / child_info.visits)
+                   1.5 * sqrt(log(parent_info.visits) / child_info.visits)
 
         return self._select_best_child(grid, ucb, current_color)
 
@@ -108,7 +119,7 @@ class MCTSPlayer(Player):
 
 if __name__ == '__main__':
     game = Game(Grid(), Judge(),
-                MCTSPlayer(Color.RED, Judge(), 1000),
-                MCTSPlayer(Color.BLACK, Judge(), 1000))
+                MCTSPlayer(Color.RED, Judge(), None, 1000),
+                MCTSPlayer(Color.BLACK, Judge(), None, 1000))
 
     print(game.play())
