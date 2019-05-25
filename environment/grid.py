@@ -1,3 +1,4 @@
+import copy
 from typing import List, Union
 
 from environment.colors import Color
@@ -75,3 +76,12 @@ class Grid:
     def available_moves(self) -> List[int]:
         return [col_id for col_id in range(self._ncols)
                 if self._heights[col_id] < self._nrows]
+
+    def grid_after_move(self, color: Color, column: int):
+        assert column in range(self._ncols), 'Column out of grid'
+        height = self._heights[column]
+        assert height < self._nrows, 'Full column'
+
+        result = copy.deepcopy(self._grid)
+        result[column][height] = color
+        return Grid.from_state(State(result))
