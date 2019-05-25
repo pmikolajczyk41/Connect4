@@ -38,6 +38,7 @@ class MinmaxPlayer(Player):
             if self._color == MAX_COLOR and value > best_value or \
                     self._color == MIN_COLOR and value < best_value:
                 best_move, best_value = move, value
+            if self._deadline.is_set(): break
 
         return best_move
 
