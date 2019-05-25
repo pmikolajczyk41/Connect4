@@ -31,8 +31,8 @@ class MCTSPlayer(Player):
         finishing_move = self._finishing_move_in(grid)
         if finishing_move is not None: return finishing_move
 
-        if state not in self._tree.keys():
-            self._tree[state] = NodeInfo(visits=0, is_leaf=True, wins=0)
+        if (state, self._color) not in self._tree.keys():
+            self._tree[(state, self._color)] = NodeInfo(visits=0, is_leaf=True, wins=0)
 
         self._compute(grid)
 
@@ -51,12 +51,12 @@ class MCTSPlayer(Player):
                 self._backprop(has_won)
 
     def _backprop(self, has_won: bool) -> None:
-        for s in self._nodes_for_backprop:
-            node_info = self._tree[s]
+        for s, color in self._nodes_for_backprop:
+            node_info = self._tree[(s, color)]
             new_info = NodeInfo(wins=node_info.wins + has_won,
                                 visits=node_info.visits + 1,
                                 is_leaf=node_info.is_leaf)
-            self._tree[s] = new_info
+            self._tree[(s, color)] = new_info
         self._nodes_for_backprop.clear()
 
     def _select_best_child(self, parent: Grid, map_node_info: callable,
@@ -64,10 +64,11 @@ class MCTSPlayer(Player):
         """map_node_info should take parent's node_info and child's and return a positive float"""
         assert len(parent.available_moves) > 0, 'A leaf actually'
 
-        parent_info = self._tree[parent.state]
+        parent_info = self._tree[(parent.state, current_color)]
         best_move, best_result = None, -1
         for move in parent.available_moves:
-            child_info = self._tree[parent.grid_after_move(current_color, move).state]
+            child_info = self._tree[(parent.grid_after_move(current_color, move).state,
+                                     Color(1 - current_color))]
 
             temp_result = map_node_info(parent_info, child_info)
             if temp_result > best_result:
@@ -89,8 +90,8 @@ class MCTSPlayer(Player):
         return self._select_best_child(grid, ucb, current_color)
 
     def _traverse_from(self, grid: Grid, current_color: Color) -> bool:
-        self._nodes_for_backprop.append(grid.state)
-        node_info: NodeInfo = self._tree[grid.state]
+        self._nodes_for_backprop.append((grid.state, current_color))
+        node_info: NodeInfo = self._tree[(grid.state, current_color)]
         if not node_info.is_leaf:
             move = self._select_best_child_ucb(grid, current_color)
             return self._traverse_from(grid.grid_after_move(current_color, move),
@@ -100,13 +101,13 @@ class MCTSPlayer(Player):
         elif node_info.visits == 0:
             return self._rollout_from(grid, current_color)
         else:
-            self._tree[grid.state] = NodeInfo(wins=node_info.wins,
-                                              visits=node_info.visits,
-                                              is_leaf=False)
+            self._tree[(grid.state, current_color)] = NodeInfo(wins=node_info.wins,
+                                                               visits=node_info.visits,
+                                                               is_leaf=False)
             for move in grid.available_moves:
                 new_grid = grid.grid_after_move(current_color, move)
-                if new_grid.state not in self._tree.keys():
-                    self._tree[new_grid.state] = NodeInfo(wins=0, visits=0, is_leaf=True)
+                if (new_grid.state, Color(1 - current_color)) not in self._tree.keys():
+                    self._tree[(new_grid.state, 1 - current_color)] = NodeInfo(wins=0, visits=0, is_leaf=True)
 
             move = random.choice(grid.available_moves)
             return self._traverse_from(grid.grid_after_move(current_color, move),
