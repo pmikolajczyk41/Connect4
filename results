@@ -1,0 +1,42 @@
+Minmax vs MCTS winning rate (timeout: 1s, new player for each game): 0.4
+Minmax vs MCTS winning rate (timeout: 1s, new player for each game): 0.34
+Minmax vs MCTS winning rate (timeout: 1s, new player for each game): 0.3
+Minmax vs MCTS winning rate (timeout: 1s, new player for each game): 0.48
+Minmax vs MCTS winning rate (timeout: 1s, new player for each game): 0.4
+
+Minmax vs MCTS winning rate (timeout: 1s, one player for all games): 0.34
+Minmax vs MCTS winning rate (timeout: 1s, one player for all games): 0.24
+Minmax vs MCTS winning rate (timeout: 1s, one player for all games): 0.27
+Minmax vs MCTS winning rate (timeout: 1s, one player for all games): 0.28
+Minmax vs MCTS winning rate (timeout: 1s, one player for all games): 0.22
+
+Minmax vs MCTS winning rate (timeout: 2s, new player for each game): 0.24
+Minmax vs MCTS winning rate (timeout: 2s, new player for each game): 0.36
+Minmax vs MCTS winning rate (timeout: 2s, new player for each game): 0.41
+Minmax vs MCTS winning rate (timeout: 2s, new player for each game): 0.32
+Minmax vs MCTS winning rate (timeout: 2s, new player for each game): 0.35
+
+Minmax vs MCTS winning rate (timeout: 2s, one player for all games): 0.5
+Minmax vs MCTS winning rate (timeout: 2s, one player for all games): 0.47
+Minmax vs MCTS winning rate (timeout: 2s, one player for all games): 0.33
+Minmax vs MCTS winning rate (timeout: 2s, one player for all games): 0.34
+Minmax vs MCTS winning rate (timeout: 2s, one player for all games): 0.42
+
+Minmax vs MCTS winning rate (timeout: 5s, new player for each game): 0.37
+Minmax vs MCTS winning rate (timeout: 5s, new player for each game): 0.61
+Minmax vs MCTS winning rate (timeout: 5s, new player for each game): 0.33
+Minmax vs MCTS winning rate (timeout: 5s, new player for each game): 0.54
+
+Minmax vs MCTS winning rate (timeout: 5s, one player for all games): 0.32
+Minmax vs MCTS winning rate (timeout: 5s, one player for all games): 0.42
+Minmax vs MCTS winning rate (timeout: 5s, one player for all games): 0.25
+Minmax vs MCTS winning rate (timeout: 5s, one player for all games): 0.5
+
+
+Minmax vs MCTS winning rate (timeout: 10s, new player for each game): 0.25
+Minmax vs MCTS winning rate (timeout: 10s, new player for each game): 0.5
+Minmax vs MCTS winning rate (timeout: 10s, new player for each game): 0.25
+
+Minmax vs MCTS winning rate (timeout: 10s, one player for all games): 0.5
+Minmax vs MCTS winning rate (timeout: 10s, one player for all games): 0.5
+Minmax vs MCTS winning rate (timeout: 10s, one player for all games): 0.5

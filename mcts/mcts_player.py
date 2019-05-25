@@ -42,9 +42,12 @@ class MCTSPlayer(Player):
         if hasattr(self, '_timeout'):
             self._deadline.clear()
             Timer(self._timeout, lambda: self._deadline.set()).start()
+            # ctr = 0
             while not self._deadline.is_set():
+                # ctr += 1
                 has_won = self._traverse_from(grid, self._color)
                 self._backprop(has_won)
+            # print(f'counter for {self._timeout}: {ctr}')
         else:
             for _ in range(self._iterations):
                 has_won = self._traverse_from(grid, self._color)
@@ -132,7 +135,7 @@ class MCTSPlayer(Player):
 
 if __name__ == '__main__':
     game = Game(Grid(), Judge(),
-                MCTSPlayer(Color.RED, Judge(), None, 1000),
-                MCTSPlayer(Color.BLACK, Judge(), None, 1000))
+                MCTSPlayer(Color.RED, Judge(), 2, 1000),
+                MCTSPlayer(Color.BLACK, Judge(), 5, 1000))
 
     print(game.play())
