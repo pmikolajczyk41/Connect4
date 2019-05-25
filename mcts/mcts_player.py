@@ -28,9 +28,17 @@ class MCTSPlayer(Player):
         grid = Grid.from_state(state)
         assert len(grid.available_moves) > 0, 'No move available'
 
+        finishing_move = self._finishing_move_in(grid)
+        if finishing_move is not None: return finishing_move
+
         if state not in self._tree.keys():
             self._tree[state] = NodeInfo(visits=0, is_leaf=True, wins=0)
 
+        self._compute(grid)
+
+        return self._pick_most_visited_child_of(grid)
+
+    def _compute(self, grid: Grid) -> None:
         if hasattr(self, '_timeout'):
             self._deadline.clear()
             Timer(self._timeout, lambda: self._deadline.set()).start()
@@ -41,8 +49,6 @@ class MCTSPlayer(Player):
             for _ in range(self._iterations):
                 has_won = self._traverse_from(grid, self._color)
                 self._backprop(has_won)
-
-        return self._pick_most_visited_child_of(grid)
 
     def _backprop(self, has_won: bool) -> None:
         for s in self._nodes_for_backprop:
@@ -115,6 +121,12 @@ class MCTSPlayer(Player):
         has_won = self._rollout_from(grid.grid_after_move(color, move),
                                      Color(1 - color), move)
         return has_won
+
+    def _finishing_move_in(self, grid: Grid) -> Union[int, None]:
+        for move in grid.available_moves:
+            after_move = grid.grid_after_move(self._color, move)
+            if self._judge.is_over_after_move_in_col(after_move.state, move):
+                return move
 
 
 if __name__ == '__main__':
