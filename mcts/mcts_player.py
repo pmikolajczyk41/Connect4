@@ -4,6 +4,7 @@ from typing import Union
 from math import sqrt, log
 
 from environment.colors import Color
+from environment.game import Game
 from environment.grid import State, Grid
 from environment.judge import Judge
 from environment.player import Player
@@ -59,11 +60,11 @@ class MCTSPlayer(Player):
 
     def _pick_most_visited_child_of(self, grid: Grid) -> int:
         return self._select_best_child(grid,
-                                       lambda child_info, _: child_info.visits,
+                                       lambda _, child_info: child_info.visits,
                                        self._color)
 
     def _select_best_child_of(self, grid: Grid, current_color: Color) -> int:
-        def ucb(child_info: NodeInfo, parent_info: NodeInfo) -> float:
+        def ucb(parent_info: NodeInfo, child_info: NodeInfo) -> float:
             if child_info.visits == 0: return 1e9
             return child_info.wins / child_info.visits + \
                    2. * sqrt(log(parent_info.visits) / child_info.visits)
@@ -95,7 +96,7 @@ class MCTSPlayer(Player):
                                        Color(1 - current_color))
 
     def _rollout_from(self, grid: Grid, color: Color, last_col: Union[int, None] = None) -> bool:
-        if (last_col is None and self._judge.is_over(grid.state)) or \
+        if len(grid.available_moves) == 0 or (last_col is None and self._judge.is_over(grid.state)) or \
                 (last_col is not None and self._judge.is_over_after_move_in_col(grid.state, last_col)):
             return color != self._color
 
@@ -103,3 +104,11 @@ class MCTSPlayer(Player):
         has_won = self._rollout_from(grid.grid_after_move(color, move),
                                      Color(1 - color), move)
         return has_won
+
+
+if __name__ == '__main__':
+    game = Game(Grid(), Judge(),
+                MCTSPlayer(Color.RED, Judge(), 1000),
+                MCTSPlayer(Color.BLACK, Judge(), 1000))
+
+    print(game.play())
